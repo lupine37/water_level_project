@@ -1,18 +1,31 @@
-#include <ESP8266WiFi.h>
+#include <SoftwareSerial.h>
 
-#define RELAY 13
-const int trigPin = 14;
-const int echoPin = 12;
+SoftwareSerial esp8266(2, 3);
+
+#define RELAY 10
+const int trigPin = 8;
+const int echoPin = 9;
 
 long duration;
 int volume;
+unsigned long initialTime = 0;
+unsigned long finalTime = 1000;
+
+void writeString(String stringData) {
+  esp8266.write(" ");
+        for (int i = 0; i < stringData.length(); i++) {
+                esp8266.write(stringData[i]);
+        }
+}
 
 void setup() {
   pinMode(RELAY, OUTPUT);
   pinMode(trigPin, OUTPUT);
   pinMode(echoPin, INPUT);
-  Serial.begin(115200);
+  Serial.begin(9600);
+  esp8266.begin(115200);
   digitalWrite(RELAY, HIGH);
+  initialTime = millis();
 
 }
 
@@ -43,5 +56,10 @@ void loop() {
   else if (volume >= 1300) {
     Serial.println("WATER IS FULL");
     digitalWrite(RELAY, HIGH);
+  }
+  if (((millis() - initialTime) > finalTime)) {
+    String vol = String(volume);
+    writeString(vol);
+    initialTime = millis();
   }
 }
